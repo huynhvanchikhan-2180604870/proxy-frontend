@@ -31,7 +31,7 @@ function App() {
             Đổi IP proxy dễ dàng và nhanh chóng
           </p>
           <p className="text-sm text-gray-500">
-            Phát triển bởi: HUỲNH VĂN CHI KHANH
+            Phát triển bởi: HUỲNH VĂN CHÍ KHAN
           </p>
         </header>
 
