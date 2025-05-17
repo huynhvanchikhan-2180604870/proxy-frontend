@@ -95,7 +95,7 @@ function App() {
         <ProxyTable proxyIPs={proxyIPs} onDelete={deleteProxyRecord} />
 
         <footer className="mt-10 text-center text-sm text-gray-500">
-          <p>© 2025 HUỲNH VĂN CHI KHAN. Mọi quyền được bảo lưu.</p>
+          <p>© 2025 HUỲNH VĂN CHÍ KHAN. Mọi quyền được bảo lưu.</p>
           <p className="mt-1">Sử dụng dịch vụ từ ProxyNo1.com</p>
         </footer>
       </div>
