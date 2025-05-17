@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base URL for your API server
 const API_BASE_URL =
-  "https://proxy-manager-backend-086932fc1a1d.herokuapp.com/";
+  "https://proxy-manager-backend-086932fc1a1d.herokuapp.com";
 
 export const checkIpAddress = async (formattedProxy) => {
   try {
