@@ -36,8 +36,8 @@ function App() {
           <p className="text-sm sm:text-base text-indigo-600 mb-2">
             Đổi IP proxy dễ dàng và nhanh chóng
           </p>
-          <p className="text-xs sm:text-sm text-gray-500">
-            Phát triển bởi: HUỲNH VĂN CHI KHANH
+          <p className="text-sm text-gray-500">
+            Phát triển bởi: HUỲNH VĂN CHÍ KHAN
           </p>
         </header>
 
@@ -125,8 +125,8 @@ function App() {
           autoRotating={autoRotating}
         />
 
-        <footer className="mt-6 sm:mt-10 text-center text-xs sm:text-sm text-gray-500">
-          <p>© 2025 HUỲNH VĂN CHI KHANH. Mọi quyền được bảo lưu.</p>
+        <footer className="mt-10 text-center text-sm text-gray-500">
+          <p>© 2025 HUỲNH VĂN CHÍ KHAN. Mọi quyền được bảo lưu.</p>
           <p className="mt-1">Sử dụng dịch vụ từ ProxyNo1.com</p>
         </footer>
       </div>
