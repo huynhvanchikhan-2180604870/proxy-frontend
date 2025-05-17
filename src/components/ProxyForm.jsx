@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 const ProxyForm = ({
   proxyString,
@@ -6,137 +6,291 @@ const ProxyForm = ({
   apiKey,
   setApiKey,
   onRotateAndCheckIp,
+  onAutoRotateIp,
   loading,
+  autoRotating,
+  targetIpPrefix,
+  setTargetIpPrefix,
 }) => {
   const rotateButtonRef = useRef(null);
+  const autoRotateButtonRef = useRef(null);
 
-  const handleRotateAndCheckIp = () => {
+  // Đảm bảo nút auto rotate phản ánh đúng trạng thái
+  useEffect(() => {
+    console.log("Cập nhật trạng thái tự động:", autoRotating);
+  }, [autoRotating]);
+
+  const handleRotateAndCheckIp = (e) => {
     // Thêm hiệu ứng ripple khi nhấn nút
     if (rotateButtonRef.current) {
-      const button = rotateButtonRef.current;
-      const circle = document.createElement("span");
-      const diameter = Math.max(button.clientWidth, button.clientHeight);
+      try {
+        const button = rotateButtonRef.current;
+        const circle = document.createElement("span");
+        const diameter = Math.max(button.clientWidth, button.clientHeight);
 
-      circle.style.width = circle.style.height = `${diameter}px`;
-      circle.style.position = "absolute";
-      circle.style.borderRadius = "50%";
-      circle.style.backgroundColor = "rgba(255, 255, 255, 0.3)";
-      circle.style.transform = "scale(0)";
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.position = "absolute";
+        circle.style.borderRadius = "50%";
+        circle.style.backgroundColor = "rgba(255, 255, 255, 0.3)";
+        circle.style.transform = "scale(0)";
 
-      const rect = button.getBoundingClientRect();
-      circle.style.left = `${event.clientX - rect.left - diameter / 2}px`;
-      circle.style.top = `${event.clientY - rect.top - diameter / 2}px`;
+        const rect = button.getBoundingClientRect();
+        const x =
+          (e?.clientX || e?.touches?.[0]?.clientX || rect.width / 2) -
+          rect.left;
+        const y =
+          (e?.clientY || e?.touches?.[0]?.clientY || rect.height / 2) -
+          rect.top;
 
-      button.appendChild(circle);
+        circle.style.left = `${x - diameter / 2}px`;
+        circle.style.top = `${y - diameter / 2}px`;
 
-      circle.animate(
-        [
-          { transform: "scale(0)", opacity: 1 },
-          { transform: "scale(4)", opacity: 0 },
-        ],
-        {
-          duration: 600,
-          easing: "ease-out",
-        }
-      ).onfinish = () => {
-        circle.remove();
-      };
+        button.appendChild(circle);
+
+        circle.animate(
+          [
+            { transform: "scale(0)", opacity: 1 },
+            { transform: "scale(4)", opacity: 0 },
+          ],
+          {
+            duration: 600,
+            easing: "ease-out",
+          }
+        ).onfinish = () => {
+          circle.remove();
+        };
+      } catch (err) {
+        console.error("Lỗi hiệu ứng ripple:", err);
+      }
     }
 
+    console.log("Nhấn nút đổi IP");
     onRotateAndCheckIp();
   };
 
+  const handleAutoRotateIp = (e) => {
+    // Thêm hiệu ứng ripple khi nhấn nút
+    if (autoRotateButtonRef.current) {
+      try {
+        const button = autoRotateButtonRef.current;
+        const circle = document.createElement("span");
+        const diameter = Math.max(button.clientWidth, button.clientHeight);
+
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.position = "absolute";
+        circle.style.borderRadius = "50%";
+        circle.style.backgroundColor = "rgba(255, 255, 255, 0.3)";
+        circle.style.transform = "scale(0)";
+
+        const rect = button.getBoundingClientRect();
+        const x =
+          (e?.clientX || e?.touches?.[0]?.clientX || rect.width / 2) -
+          rect.left;
+        const y =
+          (e?.clientY || e?.touches?.[0]?.clientY || rect.height / 2) -
+          rect.top;
+
+        circle.style.left = `${x - diameter / 2}px`;
+        circle.style.top = `${y - diameter / 2}px`;
+
+        button.appendChild(circle);
+
+        circle.animate(
+          [
+            { transform: "scale(0)", opacity: 1 },
+            { transform: "scale(4)", opacity: 0 },
+          ],
+          {
+            duration: 600,
+            easing: "ease-out",
+          }
+        ).onfinish = () => {
+          circle.remove();
+        };
+      } catch (err) {
+        console.error("Lỗi hiệu ứng ripple:", err);
+      }
+    }
+
+    console.log("Nhấn nút tự động đổi IP, trạng thái hiện tại:", autoRotating);
+    onAutoRotateIp();
+  };
+
   return (
-    <div className="grid md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
       <div className="transition-all duration-300 hover:translate-y-[-2px]">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Proxy (định dạng: domain:port:username:password)
         </label>
-        <div className="mt-1 mb-4">
+        <div className="mt-1 mb-3 md:mb-4">
           <input
             type="text"
             value={proxyString}
             onChange={(e) => setProxyString(e.target.value)}
             placeholder="ví dụ: hnadc1.proxyno1.com:46357:huyen:huyen"
-            className="w-full px-4 py-3 border border-indigo-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+            className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-indigo-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
           />
           <p className="text-xs text-gray-500 mt-1">
             Nhập proxy theo định dạng: domain:port:username:password
+          </p>
+        </div>
+
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          API Key (lấy từ trang Dashboard proxyno1.com)
+        </label>
+        <div className="mt-1 mb-3 md:mb-4">
+          <input
+            type="text"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="Nhập API key của bạn"
+            className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-indigo-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            API key có thể xem tại trang Dashboard https://app.proxyno1.com/user
           </p>
         </div>
       </div>
 
       <div className="transition-all duration-300 hover:translate-y-[-2px]">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          API Key (lấy từ trang Dashboard proxyno1.com)
+          Đổi IP tự động đến khi có tiền tố IP mong muốn
         </label>
-        <div className="mt-1 mb-4">
+        <div className="mt-1 mb-3 md:mb-4">
           <input
             type="text"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Nhập API key của bạn"
-            className="w-full px-4 py-3 border border-indigo-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+            value={targetIpPrefix}
+            onChange={(e) => setTargetIpPrefix(e.target.value)}
+            placeholder="Ví dụ: 117.7"
+            className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-indigo-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
           />
           <p className="text-xs text-gray-500 mt-1">
-            API key có thể xem tại trang Dashboard https://app.proxyno1.com/user
+            Nhập tiền tố IP mong muốn, hệ thống sẽ tự động đổi IP đến khi tìm
+            được IP phù hợp
           </p>
         </div>
 
-        <button
-          ref={rotateButtonRef}
-          onClick={handleRotateAndCheckIp}
-          disabled={loading || !apiKey || !proxyString}
-          className={`relative overflow-hidden w-full py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${
-            loading || !apiKey || !proxyString
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 hover:shadow-md transform hover:scale-105"
-          }`}
-        >
-          {loading ? (
-            <span className="flex items-center justify-center">
-              <svg
-                className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            ref={rotateButtonRef}
+            onClick={handleRotateAndCheckIp}
+            disabled={loading || !apiKey || !proxyString}
+            className={`relative overflow-hidden w-full py-2 md:py-3 px-4 rounded-lg text-white text-sm md:text-base font-medium transition-all duration-200 ${
+              loading || !apiKey || !proxyString
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 hover:shadow-md transform hover:scale-105"
+            }`}
+          >
+            {loading && !autoRotating ? (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 md:h-5 md:w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Đang xử lý...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="mr-2 h-4 w-4 md:h-5 md:w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
                   stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Đang xử lý...
-            </span>
-          ) : (
-            <span className="flex items-center justify-center">
-              <svg
-                className="mr-2 h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              Đổi IP Và Kiểm Tra
-            </span>
-          )}
-        </button>
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                Đổi IP
+              </span>
+            )}
+          </button>
+
+          <button
+            ref={autoRotateButtonRef}
+            onClick={handleAutoRotateIp}
+            disabled={
+              (loading && !autoRotating) ||
+              !apiKey ||
+              !proxyString ||
+              !targetIpPrefix
+            }
+            className={`relative overflow-hidden w-full py-2 md:py-3 px-4 rounded-lg text-white text-sm md:text-base font-medium transition-all duration-200 ${
+              (loading && !autoRotating) ||
+              !apiKey ||
+              !proxyString ||
+              !targetIpPrefix
+                ? "bg-gray-400 cursor-not-allowed"
+                : autoRotating
+                ? "bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 hover:shadow-md"
+                : "bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 hover:shadow-md transform hover:scale-105"
+            }`}
+          >
+            {autoRotating ? (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 md:h-5 md:w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Dừng lại
+              </span>
+            ) : (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="mr-2 h-4 w-4 md:h-5 md:w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+                Tự động đổi
+              </span>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

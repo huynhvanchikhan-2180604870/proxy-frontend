@@ -1,13 +1,29 @@
+<!-- filepath: c:\Users\huynh\OneDrive\Máy tính\RollProxy\app\index.html -->
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Công cụ quản lý và đổi IP proxy - Phát triển bởi HUỲNH VĂN CHI KHANH" />
+  <title>Proxy Manager - HUỲNH VĂN CHÍ KHAN</title>
+  <script>
+    // Theo dõi lỗi không bắt được
+    window.addEventListener('error', function (e) {
+      console.error('Global error caught:', e.error || e.message);
+    });
+
+    // Theo dõi promise rejection không bắt được
+    window.addEventListener('unhandledrejection', function (e) {
+      console.error('Unhandled promise rejection:', e.reason);
+    });
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
