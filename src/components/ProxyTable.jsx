@@ -7,12 +7,19 @@ const ProxyTable = ({
   onDelete,
   onClearTemp,
   autoRotating,
+  onAddToDatabase,
 }) => {
   const tableRef = useRef(null);
   const tempTableRef = useRef(null);
 
   const handleDelete = (index, isTemp = false) => {
     onDelete(index, isTemp);
+  };
+
+  const handleAddToDatabase = (ip) => {
+    if (onAddToDatabase) {
+      onAddToDatabase(ip);
+    }
   };
 
   // Kiểm tra xem một IP có phù hợp với tiền tố yêu cầu không
@@ -125,9 +132,39 @@ const ProxyTable = ({
                     </td>
                     <td className="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-semibold text-orange-700">
                       {entry.ip}
+                      {entry.existsInDb && (
+                        <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Đã có CSDL
+                        </span>
+                      )}
+                      {!entry.existsInDb && onAddToDatabase && (
+                        <button
+                          onClick={() => handleAddToDatabase(entry.ip)}
+                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
+                        >
+                          <svg
+                            className="w-3 h-3 mr-1"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          Thêm vào CSDL
+                        </button>
+                      )}
                     </td>
                     <td className="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                       {new Date(entry.timestamp).toLocaleString("vi-VN")}
+                      {entry.existsInDb && entry.dateAddedToDb && (
+                        <div className="text-xs text-blue-600">
+                          Thêm vào CSDL: {entry.dateAddedToDb}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium">
                       <button
@@ -166,6 +203,11 @@ const ProxyTable = ({
                 <div className="flex justify-between items-start mb-2">
                   <div className="text-xs font-semibold text-orange-700">
                     IP: {entry.ip}
+                    {entry.existsInDb && (
+                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Đã có CSDL
+                      </span>
+                    )}
                   </div>
                   <button
                     onClick={() => handleDelete(index, true)}
@@ -194,6 +236,34 @@ const ProxyTable = ({
                   <span className="font-medium">Thời gian:</span>{" "}
                   {new Date(entry.timestamp).toLocaleString("vi-VN")}
                 </div>
+                {entry.existsInDb && entry.dateAddedToDb && (
+                  <div className="text-xs text-blue-600 mt-1">
+                    <span className="font-medium">Thêm vào CSDL:</span>{" "}
+                    {entry.dateAddedToDb}
+                  </div>
+                )}
+                {!entry.existsInDb && onAddToDatabase && (
+                  <div className="mt-2">
+                    <button
+                      onClick={() => handleAddToDatabase(entry.ip)}
+                      className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
+                    >
+                      <svg
+                        className="w-3 h-3 mr-1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Thêm vào CSDL
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -270,9 +340,39 @@ const ProxyTable = ({
                           Phù hợp
                         </span>
                       )}
+                      {entry.existsInDb && (
+                        <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Đã có CSDL
+                        </span>
+                      )}
+                      {!entry.existsInDb && onAddToDatabase && (
+                        <button
+                          onClick={() => handleAddToDatabase(entry.ip)}
+                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
+                        >
+                          <svg
+                            className="w-3 h-3 mr-1"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          Thêm vào CSDL
+                        </button>
+                      )}
                     </td>
                     <td className="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                       {new Date(entry.timestamp).toLocaleString("vi-VN")}
+                      {entry.existsInDb && entry.dateAddedToDb && (
+                        <div className="text-xs text-blue-600">
+                          Thêm vào CSDL: {entry.dateAddedToDb}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium">
                       <button
@@ -323,6 +423,11 @@ const ProxyTable = ({
                         Phù hợp
                       </span>
                     )}
+                    {entry.existsInDb && (
+                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Đã có CSDL
+                      </span>
+                    )}
                   </div>
                   <button
                     onClick={() => handleDelete(index, false)}
@@ -350,6 +455,34 @@ const ProxyTable = ({
                   <span className="font-medium">Thời gian:</span>{" "}
                   {new Date(entry.timestamp).toLocaleString("vi-VN")}
                 </div>
+                {entry.existsInDb && entry.dateAddedToDb && (
+                  <div className="text-xs text-blue-600 mt-1">
+                    <span className="font-medium">Thêm vào CSDL:</span>{" "}
+                    {entry.dateAddedToDb}
+                  </div>
+                )}
+                {!entry.existsInDb && onAddToDatabase && (
+                  <div className="mt-2">
+                    <button
+                      onClick={() => handleAddToDatabase(entry.ip)}
+                      className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
+                    >
+                      <svg
+                        className="w-3 h-3 mr-1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Thêm vào CSDL
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

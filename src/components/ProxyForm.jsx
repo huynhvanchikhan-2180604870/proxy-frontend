@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const ProxyForm = ({
   proxyString,
@@ -11,14 +11,38 @@ const ProxyForm = ({
   autoRotating,
   targetIpPrefix,
   setTargetIpPrefix,
+  user, // Thêm user prop để lấy thông tin người dùng đã đăng nhập
 }) => {
   const rotateButtonRef = useRef(null);
   const autoRotateButtonRef = useRef(null);
+  const [customApiKey, setCustomApiKey] = useState(false); // State để theo dõi xem người dùng có muốn dùng API key tùy chỉnh không
 
   // Đảm bảo nút auto rotate phản ánh đúng trạng thái
   useEffect(() => {
     console.log("Cập nhật trạng thái tự động:", autoRotating);
   }, [autoRotating]);
+
+  // Khi user thay đổi hoặc component mount, cập nhật API key từ user nếu không dùng custom key
+  useEffect(() => {
+    if (user && user.proxyApiKey && !customApiKey) {
+      setApiKey(user.proxyApiKey);
+    }
+  }, [user, customApiKey, setApiKey]);
+
+  // Reset customApiKey khi đăng nhập/đăng xuất
+  useEffect(() => {
+    setCustomApiKey(false);
+  }, [user]);
+
+  const toggleCustomApiKey = () => {
+    if (customApiKey) {
+      // Khi chuyển từ tùy chỉnh về mặc định
+      if (user && user.proxyApiKey) {
+        setApiKey(user.proxyApiKey); // Khôi phục API key từ user
+      }
+    }
+    setCustomApiKey(!customApiKey);
+  };
 
   const handleRotateAndCheckIp = (e) => {
     // Thêm hiệu ứng ripple khi nhấn nút
@@ -135,19 +159,61 @@ const ProxyForm = ({
           </p>
         </div>
 
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          API Key (lấy từ trang Dashboard proxyno1.com)
-        </label>
-        <div className="mt-1 mb-3 md:mb-4">
-          <input
-            type="text"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Nhập API key của bạn"
-            className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-indigo-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
-          />
+        <div className="mb-3 md:mb-4">
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-sm font-medium text-gray-700">
+              API Key
+            </label>
+            <button
+              type="button"
+              onClick={toggleCustomApiKey}
+              className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                customApiKey
+                  ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                  : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+              }`}
+            >
+              {customApiKey ? "Dùng API key mặc định" : "Dùng API key khác"}
+            </button>
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              value={apiKey}
+              onChange={(e) => customApiKey && setApiKey(e.target.value)}
+              placeholder={
+                customApiKey
+                  ? "Nhập API key của bạn"
+                  : "API key từ tài khoản đăng nhập"
+              }
+              readOnly={!customApiKey}
+              className={`w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border rounded-lg shadow-sm focus:outline-none transition-all duration-200 ${
+                customApiKey
+                  ? "border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white"
+                  : "border-indigo-300 bg-gray-50 cursor-not-allowed"
+              }`}
+            />
+            {!customApiKey && (
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            )}
+          </div>
           <p className="text-xs text-gray-500 mt-1">
-            API key có thể xem tại trang Dashboard https://app.proxyno1.com/user
+            {customApiKey
+              ? "API key có thể xem tại trang Dashboard https://app.proxyno1.com/user"
+              : "Đang sử dụng API key từ tài khoản đăng nhập của bạn"}
           </p>
         </div>
       </div>

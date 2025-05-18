@@ -1,14 +1,15 @@
 import axios from "axios";
 
-
 // Base URL for your API server
-const API_BASE_URL =
-  "https://proxy-manager-backend-086932fc1a1d.herokuapp.com";
+const API_BASE_URL = "http://localhost:5000";
 
-export const checkIpAddress = async (formattedProxy) => {
+export const checkIpAddress = async (formattedProxy, token) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/get-ip`, {
+    const response = await axios.get(`${API_BASE_URL}/api/proxy/get-ip`, {
       params: { proxy: formattedProxy },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data;
   } catch (error) {
@@ -18,10 +19,12 @@ export const checkIpAddress = async (formattedProxy) => {
   }
 };
 
-export const rotateProxyIp = async (apiKey) => {
+export const rotateProxyIp = async (token) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/change-ip`, {
-      params: { key: apiKey },
+    const response = await axios.get(`${API_BASE_URL}/api/proxy/change-ip`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data;
   } catch (error) {
