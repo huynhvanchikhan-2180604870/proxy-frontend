@@ -40,10 +40,12 @@ function App() {
     autoRotating,
     error: proxyError,
     message: proxyMessage,
+    checkIp,
     rotateAndCheckIp,
     autoRotateIp,
     deleteProxyRecord,
     clearTempProxyIPs,
+    clearAllProxyIPs,
     // Các state và function mới cho chức năng kiểm tra và thêm IP vào CSDL
     currentIp,
     ipCheckResult,
@@ -103,7 +105,7 @@ function App() {
             Đổi IP proxy dễ dàng và nhanh chóng
           </p>
           <p className="text-sm text-gray-500">
-            Phát triển bởi: HUỲNH VĂN CHÍ KHAN
+            Phát triển bởi: HUỲNH VĂN CHÍ KHANH
           </p>
         </header>
 
@@ -177,6 +179,7 @@ function App() {
                 setApiKey={setApiKey}
                 onRotateAndCheckIp={rotateAndCheckIp}
                 onAutoRotateIp={autoRotateIp}
+                onCheckIpOnly={checkIp} // Truyền hàm checkIp đã có sẵn trong hook
                 loading={proxyLoading}
                 autoRotating={autoRotating}
                 targetIpPrefix={targetIpPrefix}
@@ -263,14 +266,15 @@ function App() {
               targetIpPrefix={targetIpPrefix}
               onDelete={deleteProxyRecord}
               onClearTemp={clearTempProxyIPs}
+              onClearAll={clearAllProxyIPs} // Thêm prop mới
               autoRotating={autoRotating}
-              onAddToDatabase={handleAddIpToDatabase} // Thêm prop mới để hỗ trợ thêm IP vào CSDL từ bảng
+              onAddToDatabase={handleAddIpToDatabase}
             />
           </>
         )}
 
         <footer className="mt-10 text-center text-sm text-gray-500">
-          <p>© 2025 HUỲNH VĂN CHÍ KHAN. Mọi quyền được bảo lưu.</p>
+          <p>© 2025 HUỲNH VĂN CHÍ KHANH. Mọi quyền được bảo lưu.</p>
           <p className="mt-1">Sử dụng dịch vụ từ ProxyNo1.com</p>
         </footer>
       </div>

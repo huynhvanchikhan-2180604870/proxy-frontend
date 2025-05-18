@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const ProxyTable = ({
   proxyIPs,
@@ -6,11 +6,13 @@ const ProxyTable = ({
   targetIpPrefix,
   onDelete,
   onClearTemp,
+  onClearAll, // Thêm prop mới
   autoRotating,
   onAddToDatabase,
 }) => {
   const tableRef = useRef(null);
   const tempTableRef = useRef(null);
+  const [copiedIndex, setCopiedIndex] = useState(null);
 
   const handleDelete = (index, isTemp = false) => {
     onDelete(index, isTemp);
@@ -20,6 +22,38 @@ const ProxyTable = ({
     if (onAddToDatabase) {
       onAddToDatabase(ip);
     }
+  };
+
+  // Hàm mới để copy proxy
+  const copyProxy = (proxy, index, isTemp = false) => {
+    if (!proxy) return;
+
+    // Tách proxy để lấy domain:port:username:password
+    const parts = proxy.split("@");
+    if (parts.length !== 2) return;
+
+    const [auth, server] = parts;
+    const [username, password] = auth.split(":");
+    const [domain, port] = server.split(":");
+
+    // Tạo định dạng mới domain:port:username:password
+    const formattedProxy = `${domain}:${port}:${username}:${password}`;
+
+    // Copy vào clipboard
+    navigator.clipboard
+      .writeText(formattedProxy)
+      .then(() => {
+        // Ghi nhớ item đã copy để hiển thị hiệu ứng
+        setCopiedIndex(isTemp ? `temp-${index}` : `main-${index}`);
+
+        // Xóa hiệu ứng sau 2 giây
+        setTimeout(() => {
+          setCopiedIndex(null);
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error("Không thể copy proxy: ", err);
+      });
   };
 
   // Kiểm tra xem một IP có phù hợp với tiền tố yêu cầu không
@@ -127,8 +161,33 @@ const ProxyTable = ({
                     key={index}
                     className="hover:bg-orange-50 transition-all duration-200 animate-fadeIn"
                   >
-                    <td className="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
+                    <td className="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900 flex items-center">
                       {entry.proxy}
+                      <button
+                        onClick={() => copyProxy(entry.proxy, index, true)}
+                        className="ml-2 text-orange-500 hover:text-orange-700"
+                        title="Copy proxy"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </button>
+                      {copiedIndex === `temp-${index}` && (
+                        <span className="ml-2 text-xs text-green-600 animate-fadeIn">
+                          Đã copy!
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-semibold text-orange-700">
                       {entry.ip}
@@ -229,8 +288,33 @@ const ProxyTable = ({
                     Xóa
                   </button>
                 </div>
-                <div className="text-xs text-gray-600 mb-1">
+                <div className="text-xs text-gray-600 mb-1 flex items-center">
                   <span className="font-medium">Proxy:</span> {entry.proxy}
+                  <button
+                    onClick={() => copyProxy(entry.proxy, index, true)}
+                    className="ml-2 text-orange-500 hover:text-orange-700"
+                    title="Copy proxy"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </button>
+                  {copiedIndex === `temp-${index}` && (
+                    <span className="ml-2 text-xs text-green-600 animate-fadeIn">
+                      Đã copy!
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-gray-500">
                   <span className="font-medium">Thời gian:</span>{" "}
@@ -276,13 +360,27 @@ const ProxyTable = ({
           className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg border border-indigo-100"
           ref={tableRef}
         >
-          <div className="p-3 sm:p-4 border-b border-indigo-100 bg-gradient-to-r from-indigo-50 to-purple-50">
-            <h2 className="text-base sm:text-lg font-medium text-indigo-800">
-              Lịch Sử IP Proxy
-            </h2>
-            <p className="text-xs sm:text-sm text-indigo-600">
-              Danh sách các IP đã được kiểm tra
-            </p>
+          <div className="p-3 sm:p-4 border-b border-indigo-100 bg-gradient-to-r from-indigo-50 to-purple-50 flex justify-between items-center">
+            <div>
+              <h2 className="text-base sm:text-lg font-medium text-indigo-800">
+                Lịch Sử IP Proxy ({proxyIPs.length})
+              </h2>
+              <p className="text-xs sm:text-sm text-indigo-600">
+                Danh sách các IP đã được kiểm tra
+              </p>
+            </div>
+            {/* Thêm nút xóa tất cả */}
+            <button
+              onClick={onClearAll}
+              disabled={autoRotating}
+              className={`px-3 py-1 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+                autoRotating
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+              }`}
+            >
+              Xóa Tất Cả
+            </button>
           </div>
 
           {/* Bảng IP chính cho desktop */}
@@ -324,8 +422,33 @@ const ProxyTable = ({
                       isMatchingIp(entry.ip) ? "bg-green-50" : ""
                     }`}
                   >
-                    <td className="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
+                    <td className="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900 flex items-center">
                       {entry.proxy}
+                      <button
+                        onClick={() => copyProxy(entry.proxy, index, false)}
+                        className="ml-2 text-indigo-500 hover:text-indigo-700"
+                        title="Copy proxy"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </button>
+                      {copiedIndex === `main-${index}` && (
+                        <span className="ml-2 text-xs text-green-600 animate-fadeIn">
+                          Đã copy!
+                        </span>
+                      )}
                     </td>
                     <td
                       className={`px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-semibold ${
@@ -448,8 +571,33 @@ const ProxyTable = ({
                     Xóa
                   </button>
                 </div>
-                <div className="text-xs text-gray-600 mb-1">
+                <div className="text-xs text-gray-600 mb-1 flex items-center">
                   <span className="font-medium">Proxy:</span> {entry.proxy}
+                  <button
+                    onClick={() => copyProxy(entry.proxy, index, false)}
+                    className="ml-2 text-indigo-500 hover:text-indigo-700"
+                    title="Copy proxy"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </button>
+                  {copiedIndex === `main-${index}` && (
+                    <span className="ml-2 text-xs text-green-600 animate-fadeIn">
+                      Đã copy!
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-gray-500">
                   <span className="font-medium">Thời gian:</span>{" "}

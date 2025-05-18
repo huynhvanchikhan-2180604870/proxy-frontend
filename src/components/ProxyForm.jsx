@@ -7,15 +7,17 @@ const ProxyForm = ({
   setApiKey,
   onRotateAndCheckIp,
   onAutoRotateIp,
+  onCheckIpOnly, // Đây là hàm checkIp từ useProxyManagement
   loading,
   autoRotating,
   targetIpPrefix,
   setTargetIpPrefix,
-  user, // Thêm user prop để lấy thông tin người dùng đã đăng nhập
+  user,
 }) => {
   const rotateButtonRef = useRef(null);
   const autoRotateButtonRef = useRef(null);
-  const [customApiKey, setCustomApiKey] = useState(false); // State để theo dõi xem người dùng có muốn dùng API key tùy chỉnh không
+  const checkIpButtonRef = useRef(null);
+  const [customApiKey, setCustomApiKey] = useState(false);
 
   // Đảm bảo nút auto rotate phản ánh đúng trạng thái
   useEffect(() => {
@@ -51,23 +53,17 @@ const ProxyForm = ({
         const button = rotateButtonRef.current;
         const circle = document.createElement("span");
         const diameter = Math.max(button.clientWidth, button.clientHeight);
+        const radius = diameter / 2;
 
         circle.style.width = circle.style.height = `${diameter}px`;
-        circle.style.position = "absolute";
-        circle.style.borderRadius = "50%";
-        circle.style.backgroundColor = "rgba(255, 255, 255, 0.3)";
-        circle.style.transform = "scale(0)";
+        circle.style.left = `${e.clientX - button.offsetLeft - radius}px`;
+        circle.style.top = `${e.clientY - button.offsetTop - radius}px`;
+        circle.classList.add("ripple");
 
-        const rect = button.getBoundingClientRect();
-        const x =
-          (e?.clientX || e?.touches?.[0]?.clientX || rect.width / 2) -
-          rect.left;
-        const y =
-          (e?.clientY || e?.touches?.[0]?.clientY || rect.height / 2) -
-          rect.top;
-
-        circle.style.left = `${x - diameter / 2}px`;
-        circle.style.top = `${y - diameter / 2}px`;
+        const ripple = button.getElementsByClassName("ripple")[0];
+        if (ripple) {
+          ripple.remove();
+        }
 
         button.appendChild(circle);
 
@@ -99,23 +95,17 @@ const ProxyForm = ({
         const button = autoRotateButtonRef.current;
         const circle = document.createElement("span");
         const diameter = Math.max(button.clientWidth, button.clientHeight);
+        const radius = diameter / 2;
 
         circle.style.width = circle.style.height = `${diameter}px`;
-        circle.style.position = "absolute";
-        circle.style.borderRadius = "50%";
-        circle.style.backgroundColor = "rgba(255, 255, 255, 0.3)";
-        circle.style.transform = "scale(0)";
+        circle.style.left = `${e.clientX - button.offsetLeft - radius}px`;
+        circle.style.top = `${e.clientY - button.offsetTop - radius}px`;
+        circle.classList.add("ripple");
 
-        const rect = button.getBoundingClientRect();
-        const x =
-          (e?.clientX || e?.touches?.[0]?.clientX || rect.width / 2) -
-          rect.left;
-        const y =
-          (e?.clientY || e?.touches?.[0]?.clientY || rect.height / 2) -
-          rect.top;
-
-        circle.style.left = `${x - diameter / 2}px`;
-        circle.style.top = `${y - diameter / 2}px`;
+        const ripple = button.getElementsByClassName("ripple")[0];
+        if (ripple) {
+          ripple.remove();
+        }
 
         button.appendChild(circle);
 
@@ -140,22 +130,66 @@ const ProxyForm = ({
     onAutoRotateIp();
   };
 
+  // Hàm kiểm tra IP mà không đổi, chỉ gọi đến hàm checkIp đã có sẵn
+  const handleCheckIpOnly = (e) => {
+    // Thêm hiệu ứng ripple khi nhấn nút
+    if (checkIpButtonRef.current) {
+      try {
+        const button = checkIpButtonRef.current;
+        const circle = document.createElement("span");
+        const diameter = Math.max(button.clientWidth, button.clientHeight);
+        const radius = diameter / 2;
+
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.left = `${e.clientX - button.offsetLeft - radius}px`;
+        circle.style.top = `${e.clientY - button.offsetTop - radius}px`;
+        circle.classList.add("ripple");
+
+        const ripple = button.getElementsByClassName("ripple")[0];
+        if (ripple) {
+          ripple.remove();
+        }
+
+        button.appendChild(circle);
+
+        circle.animate(
+          [
+            { transform: "scale(0)", opacity: 1 },
+            { transform: "scale(4)", opacity: 0 },
+          ],
+          {
+            duration: 600,
+            easing: "ease-out",
+          }
+        ).onfinish = () => {
+          circle.remove();
+        };
+      } catch (err) {
+        console.error("Lỗi hiệu ứng ripple:", err);
+      }
+    }
+
+    console.log("Nhấn nút kiểm tra IP");
+    // Gọi trực tiếp hàm đã được truyền từ useProxyManagement
+    onCheckIpOnly();
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
       <div className="transition-all duration-300 hover:translate-y-[-2px]">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Proxy (định dạng: domain:port:username:password)
+          Proxy (định dạng: username:password@domain:port)
         </label>
         <div className="mt-1 mb-3 md:mb-4">
           <input
             type="text"
             value={proxyString}
             onChange={(e) => setProxyString(e.target.value)}
-            placeholder="ví dụ: hnadc1.proxyno1.com:46357:huyen:huyen"
+            placeholder="ví dụ: huyen:huyen@hnadc1.proxyno1.com:46357"
             className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-indigo-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Nhập proxy theo định dạng: domain:port:username:password
+            Nhập proxy theo định dạng: username:password@domain:port
           </p>
         </div>
 
@@ -189,14 +223,14 @@ const ProxyForm = ({
               readOnly={!customApiKey}
               className={`w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border rounded-lg shadow-sm focus:outline-none transition-all duration-200 ${
                 customApiKey
-                  ? "border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white"
-                  : "border-indigo-300 bg-gray-50 cursor-not-allowed"
+                  ? "border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  : "border-blue-300 bg-gray-50"
               }`}
             />
             {!customApiKey && (
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <svg
-                  className="h-5 w-5 text-gray-400"
+                  className="h-4 w-4 text-gray-400"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
                   fill="currentColor"
@@ -236,7 +270,64 @@ const ProxyForm = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-2">
+          {/* Nút Kiểm tra IP */}
+          <button
+            ref={checkIpButtonRef}
+            onClick={handleCheckIpOnly}
+            disabled={loading || !apiKey || !proxyString}
+            className={`relative overflow-hidden w-full py-2 md:py-3 px-4 rounded-lg text-white text-sm md:text-base font-medium transition-all duration-200 ${
+              loading || !apiKey || !proxyString
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 hover:shadow-md transform hover:scale-105"
+            }`}
+          >
+            {loading && !autoRotating ? (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 md:h-5 md:w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Đang xử lý...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="mr-2 h-4 w-4 md:h-5 md:w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                Kiểm tra IP
+              </span>
+            )}
+          </button>
+
+          {/* Nút Đổi IP */}
           <button
             ref={rotateButtonRef}
             onClick={handleRotateAndCheckIp}
@@ -292,6 +383,7 @@ const ProxyForm = ({
             )}
           </button>
 
+          {/* Nút Tự động đổi */}
           <button
             ref={autoRotateButtonRef}
             onClick={handleAutoRotateIp}
@@ -308,8 +400,8 @@ const ProxyForm = ({
               !targetIpPrefix
                 ? "bg-gray-400 cursor-not-allowed"
                 : autoRotating
-                ? "bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 hover:shadow-md"
-                : "bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 hover:shadow-md transform hover:scale-105"
+                ? "bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 hover:shadow-md"
+                : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 hover:shadow-md transform hover:scale-105"
             }`}
           >
             {autoRotating ? (
@@ -358,6 +450,17 @@ const ProxyForm = ({
           </button>
         </div>
       </div>
+
+      {/* Thêm CSS cho hiệu ứng ripple */}
+      <style jsx="true">{`
+        .ripple {
+          position: absolute;
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          transform: scale(0);
+          pointer-events: none;
+        }
+      `}</style>
     </div>
   );
 };

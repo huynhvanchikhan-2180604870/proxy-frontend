@@ -699,7 +699,11 @@ export function useProxyManagement(token) {
       setProxyIPs((prev) => prev.filter((_, i) => i !== index));
     }
   };
-
+  // Thêm hàm này vào phần khai báo các hàm của hook
+  const clearAllProxyIPs = () => {
+    setProxyIPs([]);
+    setMessage("Đã xóa tất cả lịch sử IP.");
+  };
   return {
     proxyString,
     setProxyString,
@@ -717,7 +721,7 @@ export function useProxyManagement(token) {
     autoRotateIp,
     deleteProxyRecord,
     clearTempProxyIPs,
-
+    clearAllProxyIPs,
     // Thêm các state và function mới
     currentIp,
     ipCheckResult,
