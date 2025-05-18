@@ -103,7 +103,7 @@ function App() {
             Đổi IP proxy dễ dàng và nhanh chóng
           </p>
           <p className="text-sm text-gray-500">
-            Phát triển bởi: HUỲNH VĂN CHÍ KHANH
+            Phát triển bởi: HUỲNH VĂN CHÍ KHAN
           </p>
         </header>
 
@@ -270,7 +270,7 @@ function App() {
         )}
 
         <footer className="mt-10 text-center text-sm text-gray-500">
-          <p>© 2025 HUỲNH VĂN CHÍ KHANH. Mọi quyền được bảo lưu.</p>
+          <p>© 2025 HUỲNH VĂN CHÍ KHAN. Mọi quyền được bảo lưu.</p>
           <p className="mt-1">Sử dụng dịch vụ từ ProxyNo1.com</p>
         </footer>
       </div>
