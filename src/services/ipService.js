@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const IP_API_BASE_URL = "http://localhost:5000";
+const IP_API_BASE_URL =
+  "https://proxy-manager-backend-086932fc1a1d.herokuapp.com";
 
 const createApiWithAuth = (token) => {
   const api = axios.create({

@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // Base URL for your API server
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL =
+  "https://proxy-manager-backend-086932fc1a1d.herokuapp.com";
 
 export const registerUser = async (userData) => {
   try {
