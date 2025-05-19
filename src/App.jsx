@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import AuthContainer from "./components/AuthContainer";
+import AutoFillForm from "./components/AutoFillForm"; // Import component mới
 import IpDatabaseInfo from "./components/IpDatabaseInfo";
 import ProxyForm from "./components/ProxyForm";
 import ProxyTable from "./components/ProxyTable";
@@ -7,6 +8,9 @@ import { useAuth } from "./hooks/useAuth";
 import { useProxyManagement } from "./hooks/useProxyManagement";
 
 function App() {
+  // State quản lý tab active
+  const [activeTab, setActiveTab] = useState("proxy"); // "proxy" hoặc "autoFill"
+
   const {
     user,
     token,
@@ -46,13 +50,12 @@ function App() {
     deleteProxyRecord,
     clearTempProxyIPs,
     clearAllProxyIPs,
-    // Các state và function mới cho chức năng kiểm tra và thêm IP vào CSDL
     currentIp,
     ipCheckResult,
     checkingDatabase,
     addingToDatabase,
     addIpToDatabase,
-  } = useProxyManagement(token); // Truyền token vào hook
+  } = useProxyManagement(token);
 
   const errorRef = useRef(null);
   const messageRef = useRef(null);
@@ -170,106 +173,166 @@ function App() {
               </button>
             </div>
 
-            {/* Khu vực Proxy Management */}
-            <div className="bg-white rounded-xl shadow-xl p-4 sm:p-6 mb-6 sm:mb-8 transition-all duration-300 hover:shadow-2xl border border-indigo-100">
-              <ProxyForm
-                proxyString={proxyString}
-                setProxyString={setProxyString}
-                apiKey={apiKey}
-                setApiKey={setApiKey}
-                onRotateAndCheckIp={rotateAndCheckIp}
-                onAutoRotateIp={autoRotateIp}
-                onCheckIpOnly={checkIp} // Truyền hàm checkIp đã có sẵn trong hook
-                loading={proxyLoading}
-                autoRotating={autoRotating}
-                targetIpPrefix={targetIpPrefix}
-                setTargetIpPrefix={setTargetIpPrefix}
-                user={user}
-              />
-
-              {/* Component hiển thị thông tin IP trong CSDL */}
-              {currentIp && (
-                <IpDatabaseInfo
-                  currentIp={currentIp}
-                  ipCheckResult={ipCheckResult}
-                  checkingDatabase={checkingDatabase}
-                  addingToDatabase={addingToDatabase}
-                  onAddToDatabase={handleAddIpToDatabase}
-                />
-              )}
-
-              {proxyError && (
-                <div
-                  className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg animate-pulse text-sm sm:text-base"
-                  ref={errorRef}
-                >
-                  <div className="flex items-center">
-                    <svg
-                      className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-red-500 flex-shrink-0"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span className="break-words">{proxyError}</span>
-                  </div>
+            {/* Tab Navigation */}
+            <div className="mb-6 flex rounded-lg overflow-hidden border border-indigo-200 bg-white">
+              <button
+                className={`flex-1 text-center py-3 font-medium transition-all duration-200 ${
+                  activeTab === "proxy"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-white text-indigo-600 hover:bg-indigo-50"
+                }`}
+                onClick={() => setActiveTab("proxy")}
+              >
+                <div className="flex items-center justify-center">
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Quản Lý Proxy
                 </div>
-              )}
-
-              {proxyMessage && (
-                <div
-                  className={`mt-4 p-3 border rounded-lg text-sm sm:text-base ${
-                    autoRotating
-                      ? "bg-blue-100 border-blue-400 text-blue-700"
-                      : "bg-green-100 border-green-400 text-green-700 animate-bounce"
-                  }`}
-                  ref={messageRef}
-                >
-                  <div className="flex items-center">
-                    <svg
-                      className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0 ${
-                        autoRotating ? "text-blue-500" : "text-green-500"
-                      }`}
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      {autoRotating ? (
-                        <path
-                          fillRule="evenodd"
-                          d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                          clipRule="evenodd"
-                        />
-                      ) : (
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      )}
-                    </svg>
-                    <span className="break-words">{proxyMessage}</span>
-                  </div>
+              </button>
+              <button
+                className={`flex-1 text-center py-3 font-medium transition-all duration-200 ${
+                  activeTab === "autoFill"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-white text-indigo-600 hover:bg-indigo-50"
+                }`}
+                onClick={() => setActiveTab("autoFill")}
+              >
+                <div className="flex items-center justify-center">
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Công Cụ Tự Điền
                 </div>
-              )}
+              </button>
             </div>
 
-            {/* Bảng hiển thị IP */}
-            <ProxyTable
-              proxyIPs={proxyIPs}
-              tempProxyIPs={tempProxyIPs}
-              targetIpPrefix={targetIpPrefix}
-              onDelete={deleteProxyRecord}
-              onClearTemp={clearTempProxyIPs}
-              onClearAll={clearAllProxyIPs} // Thêm prop mới
-              autoRotating={autoRotating}
-              onAddToDatabase={handleAddIpToDatabase}
-            />
+            {/* Tab Content */}
+            {activeTab === "proxy" ? (
+              <>
+                {/* Khu vực Proxy Management */}
+                <div className="bg-white rounded-xl shadow-xl p-4 sm:p-6 mb-6 sm:mb-8 transition-all duration-300 hover:shadow-2xl border border-indigo-100">
+                  <ProxyForm
+                    proxyString={proxyString}
+                    setProxyString={setProxyString}
+                    apiKey={apiKey}
+                    setApiKey={setApiKey}
+                    onRotateAndCheckIp={rotateAndCheckIp}
+                    onAutoRotateIp={autoRotateIp}
+                    onCheckIpOnly={checkIp}
+                    loading={proxyLoading}
+                    autoRotating={autoRotating}
+                    targetIpPrefix={targetIpPrefix}
+                    setTargetIpPrefix={setTargetIpPrefix}
+                    user={user}
+                  />
+
+                  {/* Component hiển thị thông tin IP trong CSDL */}
+                  {currentIp && (
+                    <IpDatabaseInfo
+                      currentIp={currentIp}
+                      ipCheckResult={ipCheckResult}
+                      checkingDatabase={checkingDatabase}
+                      addingToDatabase={addingToDatabase}
+                      onAddToDatabase={handleAddIpToDatabase}
+                    />
+                  )}
+
+                  {proxyError && (
+                    <div
+                      className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg animate-pulse text-sm sm:text-base"
+                      ref={errorRef}
+                    >
+                      <div className="flex items-center">
+                        <svg
+                          className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-red-500 flex-shrink-0"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="break-words">{proxyError}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {proxyMessage && (
+                    <div
+                      className={`mt-4 p-3 border rounded-lg text-sm sm:text-base ${
+                        autoRotating
+                          ? "bg-blue-100 border-blue-400 text-blue-700"
+                          : "bg-green-100 border-green-400 text-green-700 animate-bounce"
+                      }`}
+                      ref={messageRef}
+                    >
+                      <div className="flex items-center">
+                        <svg
+                          className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0 ${
+                            autoRotating ? "text-blue-500" : "text-green-500"
+                          }`}
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          {autoRotating ? (
+                            <path
+                              fillRule="evenodd"
+                              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                              clipRule="evenodd"
+                            />
+                          ) : (
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          )}
+                        </svg>
+                        <span className="break-words">{proxyMessage}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bảng hiển thị IP */}
+                <ProxyTable
+                  proxyIPs={proxyIPs}
+                  tempProxyIPs={tempProxyIPs}
+                  targetIpPrefix={targetIpPrefix}
+                  onDelete={deleteProxyRecord}
+                  onClearTemp={clearTempProxyIPs}
+                  onClearAll={clearAllProxyIPs}
+                  autoRotating={autoRotating}
+                  onAddToDatabase={handleAddIpToDatabase}
+                />
+              </>
+            ) : (
+              /* Tab công cụ tự điền form */
+              <AutoFillForm />
+            )}
           </>
         )}
 
